@@ -33,6 +33,9 @@ namespace WinWeatherTheme.dto
         [JsonProperty("isWithTime")]
         public bool IsWithTime { get; set; }
 
+        [JsonProperty("isNoChangeIfFocusAssist")]
+        public bool IsNoChangeIfFocusAssist { get; set; }
+
 
     }
 }

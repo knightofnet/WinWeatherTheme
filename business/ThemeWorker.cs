@@ -59,5 +59,24 @@ namespace WinWeatherTheme.business
 
             return ThemeChoice.Undetermined;
         }
+
+        public static bool IsFocusAssistEnabled()
+        {
+            RegistryKey concentrationKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Focus Assist", false);
+            if (concentrationKey != null)
+            {
+                int concentrationValue = (int)concentrationKey.GetValue("Configuration", -1);
+                if (concentrationValue == 1)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+            _log.Warn("Erreur : impossible de déterminer l'état de l'assistant de configuration");
+            
+            return false;
+        }
     }
 }

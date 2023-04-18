@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WinWeatherTheme"
         mc:Ignorable="d"
-        Title="MainWindow" Height="274" Width="569">
+        Title="WinWeatherTheme" Height="274" Width="569" Closing="Window_Closing">
     <Grid>
-        <GroupBox x:Name="gbCoord" Header="Coordonnées" Margin="10,10,10,30">
+        <GroupBox x:Name="gbCoord" Header="Options" Margin="10,10,10,30">
             <Grid >
                 <CheckBox x:Name="chkCoord" Content="Selon couverture nuageuse" HorizontalAlignment="Left" Margin="10,8,0,0" VerticalAlignment="Top" Click="chkCoord_Click"/>
                 <Grid x:Name="grCoord" HorizontalAlignment="Left" Height="26" VerticalAlignment="Top" Margin="10,28,0,0">
@@ -16,6 +16,8 @@
 
                     <Label Content="Longitude : " HorizontalAlignment="Left" Margin="167,0,0,0" VerticalAlignment="Center"/>
                     <TextBox x:Name="tbLong" HorizontalAlignment="Left" Margin="239,0,0,0" TextWrapping="Wrap" Text="0.701236" VerticalAlignment="Center" Width="100"/>
+
+                    <Label x:Name="lblRes" Content="RES" HorizontalAlignment="Left" Margin="344,0,0,0" VerticalAlignment="Center"/>
                 </Grid>
 
                 <CheckBox x:Name="chkTime" Content="Selon l'heure" HorizontalAlignment="Left" Margin="10,59,0,0" VerticalAlignment="Top" Click="chkTime_Click"/>
@@ -27,9 +29,12 @@
                     <TextBox x:Name="tbHourEnd" HorizontalAlignment="Left" Margin="259,0,0,0" TextWrapping="Wrap" Text="18:00" VerticalAlignment="Center" Width="100"/>
                 </Grid>
 
+                <CheckBox x:Name="chkNoChangeIfFocusAssist" Content="Ne pas changer le theme si l'assistant de concentration est activé" HorizontalAlignment="Left" Margin="10,110,0,0" VerticalAlignment="Top"/>
+
+
                 <Button x:Name="btnApplyCoord" Content="Appliquer" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Height="21" Width="79" Click="btnApplyCoord_Click"/>
-                <Label x:Name="lblRes" Content="RES" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom"/>
-                <Label x:Name="lblShowOptions" Content="Label" HorizontalAlignment="Left" Margin="10,110,0,0" VerticalAlignment="Top"/>
+
+                <TextBlock x:Name="lblShowOptions" Text="Label" Margin="10,130,10,0" VerticalAlignment="Top" TextWrapping="Wrap"/>
 
 
             </Grid>

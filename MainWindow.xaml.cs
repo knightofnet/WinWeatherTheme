@@ -13,6 +13,7 @@ using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Converters;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -23,6 +24,9 @@ using WinWeatherTheme.dto;
 using WinWeatherTheme.dto.jsonresponse;
 using WinWeatherTheme.utils;
 using MessageBox = System.Windows.MessageBox;
+using FormContextMenu = System.Windows.Forms.ContextMenu;
+using FormMenuItem = System.Windows.Forms.MenuItem;
+
 
 namespace WinWeatherTheme
 {
@@ -35,6 +39,8 @@ namespace WinWeatherTheme
 
         private NotifyIcon _notifyIcon;
         private DispatcherTimer _mainTimer;
+
+        public bool IsRealClose { get; set; }
 
         private readonly WeatherServices _weatherServices = new WeatherServices();
 
@@ -83,6 +89,7 @@ namespace WinWeatherTheme
 
             chkCoord.IsChecked = App.Conf.IsWithCoord;
             chkTime.IsChecked = App.Conf.IsWithTime;
+            chkNoChangeIfFocusAssist.IsChecked = App.Conf.IsNoChangeIfFocusAssist;
 
             grCoord.IsEnabled = chkCoord.IsChecked ?? false;
             grTime.IsEnabled = chkTime.IsChecked ?? false;
@@ -102,6 +109,61 @@ namespace WinWeatherTheme
             _notifyIcon = new NotifyIcon();
             _notifyIcon.Icon = System.Drawing.Icon.ExtractAssociatedIcon(
                 System.Reflection.Assembly.GetEntryAssembly().ManifestModule.Name);
+            _notifyIcon.Visible = true;
+            _notifyIcon.MouseDoubleClick += (sender, args) =>
+            {
+                ToggleWindow(true);
+
+            };
+
+            FormMenuItem quitMen = new FormMenuItem();
+            quitMen.Text = "Quitter";
+            quitMen.Click += (sender, args) =>
+            {
+                IsRealClose = true;
+                Close();
+            };
+
+            FormMenuItem activeMen = new FormMenuItem();
+            activeMen.Text = "Restaurer la fenêtre";
+            activeMen.Click += (sender, args) =>
+            {
+                ToggleWindow(true);
+            };
+
+            FormMenuItem forceToggleTheme = new FormMenuItem();
+            forceToggleTheme.Text = "Inverser le thême";
+            forceToggleTheme.Click += (sender, args) =>
+            {
+                if (_mainTimer != null && _mainTimer.IsEnabled)
+                {
+                    _mainTimer.Stop();
+                    lblStatus.Content = "Arrêté";
+                }
+
+                ToggleTheme(ThemeWorker.ThemeChoice.Undetermined);
+
+            };
+
+            _notifyIcon.ContextMenu = new FormContextMenu();
+            _notifyIcon.ContextMenu.MenuItems.Add(activeMen);
+            _notifyIcon.ContextMenu.MenuItems.Add(forceToggleTheme);
+            _notifyIcon.ContextMenu.MenuItems.Add(quitMen);
+        }
+
+        private void ToggleWindow(bool b)
+        {
+            if (b)
+            {
+                Activate();
+                WindowState = WindowState.Normal;
+                ShowInTaskbar = true;
+            }
+            else
+            {
+                WindowState = WindowState.Minimized;
+                ShowInTaskbar = false;
+            }
         }
 
         private void btnApplyCoord_Click(object sender, RoutedEventArgs e)
@@ -109,6 +171,7 @@ namespace WinWeatherTheme
             if (Keyboard.Modifiers == ModifierKeys.Control && _mainTimer != null && _mainTimer.IsEnabled)
             {
                 Log.Debug("Arrêt du timer");
+                lblStatus.Content = "Arrêté";
                 _mainTimer.Stop();
                 return;
             }
@@ -124,6 +187,7 @@ namespace WinWeatherTheme
             App.Conf.HourEnd = TimeSpan.Parse(tbHourEnd.Text);
             App.Conf.IsWithCoord = chkCoord.IsChecked ?? false;
             App.Conf.IsWithTime = chkTime.IsChecked ?? false;
+            App.Conf.IsNoChangeIfFocusAssist = chkNoChangeIfFocusAssist.IsChecked ?? false;
 
             if (_mainTimer != null)
             {
@@ -137,6 +201,7 @@ namespace WinWeatherTheme
 
             _mainTimer.Start();
             lblStatus.Content = "Démarré";
+            MainTimerOnTick(null, null);
 
             if (!App.SaveAppConf())
             {
@@ -193,18 +258,30 @@ namespace WinWeatherTheme
                 isLightTheme &= isHourChoice;
             }
 
-            Log.Debug($"currentIsLight: {isCurrentLightTheme}, isNewIsLight: {isLightTheme}");
+            bool isChangeToDo = (isCurrentLightTheme && !isLightTheme || !isCurrentLightTheme && isLightTheme);
+            if (App.Conf.IsNoChangeIfFocusAssist)
+            {
+                bool isFocusAssistEnabled = ThemeWorker.IsFocusAssistEnabled();
 
-            if (isCurrentLightTheme && !isLightTheme || !isCurrentLightTheme && isLightTheme)
+
+                isChangeToDo &= !isFocusAssistEnabled;
+            }
+
+            Log.Debug(
+                $"currentIsLight: {isCurrentLightTheme}, isNewIsLight: {isLightTheme}, isChangeToDo: {isChangeToDo}");
+
+            if (isChangeToDo)
             {
                 Log.Debug("=> Change");
 
-                ThemeWorker.SetAppTheme(isLightTheme
+                ToggleTheme(isLightTheme
                     ? ThemeWorker.ThemeChoice.Light
                     : ThemeWorker.ThemeChoice.Dark);
-                ThemeWorker.SetSystemTheme(isLightTheme
-                    ? ThemeWorker.ThemeChoice.Light
-                    : ThemeWorker.ThemeChoice.Dark);
+
+
+                rdThLight.IsChecked = isLightTheme;
+                rdThDark.IsChecked = !isLightTheme;
+
             }
 
             Log.Debug("MainTimerOnTick - End");
@@ -220,18 +297,29 @@ namespace WinWeatherTheme
             HandleRadioBtnTheme();
         }
 
-        private void HandleRadioBtnTheme()
+        private void HandleRadioBtnTheme(bool isForceDark = false)
         {
-            if (rdThDark.IsChecked ?? false)
+            if (rdThDark.IsChecked ?? false || isForceDark)
             {
-                ThemeWorker.SetAppTheme(ThemeWorker.ThemeChoice.Dark);
-                ThemeWorker.SetSystemTheme(ThemeWorker.ThemeChoice.Dark);
+                ToggleTheme(ThemeWorker.ThemeChoice.Dark);
             }
             else
             {
-                ThemeWorker.SetAppTheme(ThemeWorker.ThemeChoice.Light);
-                ThemeWorker.SetSystemTheme(ThemeWorker.ThemeChoice.Light);
+                ToggleTheme(ThemeWorker.ThemeChoice.Light);
             }
+        }
+
+        private static void ToggleTheme(ThemeWorker.ThemeChoice theme)
+        {
+            if (theme == ThemeWorker.ThemeChoice.Undetermined)
+            {
+                theme = ThemeWorker.GetSystemTheme() == ThemeWorker.ThemeChoice.Dark
+                    ? ThemeWorker.ThemeChoice.Light
+                    : ThemeWorker.ThemeChoice.Dark;
+            }
+
+            ThemeWorker.SetAppTheme(theme);
+            ThemeWorker.SetSystemTheme(theme);
         }
 
         private void chkCoord_Click(object sender, RoutedEventArgs e)
@@ -272,7 +360,7 @@ namespace WinWeatherTheme
             }
 
 
-            lblShowOptions.Content = txtLbl;
+            lblShowOptions.Text = txtLbl;
         }
 
         private bool VerifyConf()
@@ -349,5 +437,22 @@ namespace WinWeatherTheme
 
             return true;
         }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (IsRealClose || (_mainTimer == null || !_mainTimer.IsEnabled))
+            {
+                _notifyIcon.Visible = false;
+            }
+            else
+            {
+                e.Cancel = true;
+                _notifyIcon.Visible = true;
+
+                ToggleWindow(false);
+            }
+        }
+
+
     }
 }
