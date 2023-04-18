@@ -31,12 +31,12 @@ namespace WinWeatherTheme
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static Logger Log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        private NotifyIcon notifyIcon;
-        private DispatcherTimer mainTimer;
+        private NotifyIcon _notifyIcon;
+        private DispatcherTimer _mainTimer;
 
-        private WeatherServices weatherServices = new WeatherServices();
+        private readonly WeatherServices _weatherServices = new WeatherServices();
 
         public MainWindow()
         {
@@ -48,13 +48,20 @@ namespace WinWeatherTheme
 
             App.Session.WeatherResultsCache =
                 new ResultWeatherCache(RefreshWeatherRes, TimeSpan.FromHours(1), App.Conf.Coords);
-
         }
 
         private async Task<WeatherJsonResponse> RefreshWeatherRes(WeatherInputParams arg)
         {
             Log.Debug("refresh weather");
-            return await weatherServices.GetWeather(App.Conf.Coords.Latitude, App.Conf.Coords.Longitude);
+            WeatherJsonResponse weatherJsonResponse =
+                await _weatherServices.GetWeather(App.Conf.Coords.Latitude, App.Conf.Coords.Longitude);
+
+            if (weatherJsonResponse.IsCallOk)
+            {
+                return weatherJsonResponse;
+            }
+
+            return App.Session.WeatherResultsCache.LastWeatherJsonResponse;
         }
 
         private void InitElement()
@@ -80,8 +87,8 @@ namespace WinWeatherTheme
             grCoord.IsEnabled = chkCoord.IsChecked ?? false;
             grTime.IsEnabled = chkTime.IsChecked ?? false;
 
-            tbLatt.Text = App.Conf.Coords.Latitude.ToString();
-            tbLong.Text = App.Conf.Coords.Longitude.ToString();
+            tbLatt.Text = App.Conf.Coords.Latitude.ToString(CultureInfo.InvariantCulture);
+            tbLong.Text = App.Conf.Coords.Longitude.ToString(CultureInfo.InvariantCulture);
             tbHourStart.Text = App.Conf.HourStart.ToString("h\\:mm");
             tbHourEnd.Text = App.Conf.HourEnd.ToString("h\\:mm");
 
@@ -92,14 +99,19 @@ namespace WinWeatherTheme
 
         private void InitNotifyIcon()
         {
-            notifyIcon = new NotifyIcon();
-            notifyIcon.Icon = System.Drawing.Icon.ExtractAssociatedIcon(
+            _notifyIcon = new NotifyIcon();
+            _notifyIcon.Icon = System.Drawing.Icon.ExtractAssociatedIcon(
                 System.Reflection.Assembly.GetEntryAssembly().ManifestModule.Name);
-
         }
 
         private void btnApplyCoord_Click(object sender, RoutedEventArgs e)
         {
+            if (Keyboard.Modifiers == ModifierKeys.Control && _mainTimer != null && _mainTimer.IsEnabled)
+            {
+                Log.Debug("Arrêt du timer");
+                _mainTimer.Stop();
+                return;
+            }
 
             if (!VerifyConf())
             {
@@ -113,17 +125,17 @@ namespace WinWeatherTheme
             App.Conf.IsWithCoord = chkCoord.IsChecked ?? false;
             App.Conf.IsWithTime = chkTime.IsChecked ?? false;
 
-            if (mainTimer != null)
+            if (_mainTimer != null)
             {
-                mainTimer.Stop();
-                mainTimer = null;
+                _mainTimer.Stop();
+                _mainTimer = null;
             }
 
-            mainTimer = new DispatcherTimer();
-            mainTimer.Interval = new TimeSpan(0, 0, 30);
-            mainTimer.Tick += MainTimerOnTick;
+            _mainTimer = new DispatcherTimer();
+            _mainTimer.Interval = new TimeSpan(0, 0, 30);
+            _mainTimer.Tick += MainTimerOnTick;
 
-            mainTimer.Start();
+            _mainTimer.Start();
             lblStatus.Content = "Démarré";
 
             if (!App.SaveAppConf())
@@ -132,87 +144,8 @@ namespace WinWeatherTheme
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
-
         }
 
-        private bool VerifyConf()
-        {
-            Log.Debug("VerifyConf - Start");
-
-            AppConf appConf = new AppConf();
-
-            appConf.IsWithCoord = chkCoord.IsChecked ?? false;
-            appConf.IsWithTime = chkTime.IsChecked ?? false;
-
-            appConf.Coords = new WeatherInputParams();
-
-            if (appConf.IsWithCoord)
-            {
-                try
-                {
-                    appConf.Coords.Latitude = float.Parse(tbLatt.Text.Trim().Replace(",", "."), CultureInfo.InvariantCulture);
-                    appConf.Coords.Longitude = float.Parse(tbLong.Text.Trim().Replace(",", "."), CultureInfo.InvariantCulture);
-                }
-                catch (Exception e)
-                {
-                    Log.Warn(e);
-                    MessageBox.Show("Erreur : la latitude ou la longitude ne sont pas valides.", "Erreur",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-                    return false;
-                }
-
-                if (Math.Abs(appConf.Coords.Latitude) > 90F)
-                {
-                    MessageBox.Show("Erreur : la latitude doit être comprise entre -90 et 90.", "Erreur",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-                    return false;
-                }
-
-                if (Math.Abs(appConf.Coords.Longitude) > 180F)
-                {
-                    MessageBox.Show("Erreur : la longitude doit être comprise entre -180 et 180.", "Erreur",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-                    return false;
-                }
-
-            }
-
-
-    
-
-            if (appConf.IsWithTime)
-            {
-
-                try
-                {
-                    appConf.HourStart = TimeSpan.Parse(tbHourStart.Text);
-                    appConf.HourEnd = TimeSpan.Parse(tbHourEnd.Text);
-                }
-                catch (Exception e)
-                {
-                    Log.Warn(e);
-                    MessageBox.Show("Erreur : l'heure de fin ou l'heure de fin ne sont pas valides.", "Erreur",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-                    return false;
-                }
-
-                if (appConf.HourEnd < appConf.HourStart)
-                {
-                    MessageBox.Show("Erreur : l'heure de fin est après l'heure de début.", "Erreur", MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-
-                    return false;
-                }
-
-
-            }
-
-            return true;
-        }
 
         private async void MainTimerOnTick(object sender, EventArgs e)
         {
@@ -272,7 +205,6 @@ namespace WinWeatherTheme
                 ThemeWorker.SetSystemTheme(isLightTheme
                     ? ThemeWorker.ThemeChoice.Light
                     : ThemeWorker.ThemeChoice.Dark);
-
             }
 
             Log.Debug("MainTimerOnTick - End");
@@ -309,7 +241,6 @@ namespace WinWeatherTheme
         }
 
 
-
         private void chkTime_Click(object sender, RoutedEventArgs e)
         {
             grTime.IsEnabled = chkTime.IsChecked ?? false;
@@ -332,7 +263,8 @@ namespace WinWeatherTheme
             }
             else if (isWithCoord)
             {
-                txtLbl = $"Le theme clair sera activé si la couverture nuagueuse est supérieure à {App.Conf.CloudCoverThresholdLight}%.";
+                txtLbl =
+                    $"Le theme clair sera activé si la couverture nuagueuse est supérieure à {App.Conf.CloudCoverThresholdLight}%.";
             }
             else if (isWithTime)
             {
@@ -341,6 +273,81 @@ namespace WinWeatherTheme
 
 
             lblShowOptions.Content = txtLbl;
+        }
+
+        private bool VerifyConf()
+        {
+            Log.Debug("VerifyConf - Start");
+
+            AppConf appConf = new AppConf();
+
+            appConf.IsWithCoord = chkCoord.IsChecked ?? false;
+            appConf.IsWithTime = chkTime.IsChecked ?? false;
+
+            appConf.Coords = new WeatherInputParams();
+
+            if (appConf.IsWithCoord)
+            {
+                try
+                {
+                    appConf.Coords.Latitude =
+                        float.Parse(tbLatt.Text.Trim().Replace(",", "."), CultureInfo.InvariantCulture);
+                    appConf.Coords.Longitude =
+                        float.Parse(tbLong.Text.Trim().Replace(",", "."), CultureInfo.InvariantCulture);
+                }
+                catch (Exception e)
+                {
+                    Log.Warn(e);
+                    MessageBox.Show("Erreur : la latitude ou la longitude ne sont pas valides.", "Erreur",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    return false;
+                }
+
+                if (Math.Abs(appConf.Coords.Latitude) > 90F)
+                {
+                    MessageBox.Show("Erreur : la latitude doit être comprise entre -90 et 90.", "Erreur",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    return false;
+                }
+
+                if (Math.Abs(appConf.Coords.Longitude) > 180F)
+                {
+                    MessageBox.Show("Erreur : la longitude doit être comprise entre -180 et 180.", "Erreur",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    return false;
+                }
+            }
+
+            if (appConf.IsWithTime)
+            {
+                try
+                {
+                    appConf.HourStart = TimeSpan.Parse(tbHourStart.Text);
+                    appConf.HourEnd = TimeSpan.Parse(tbHourEnd.Text);
+                }
+                catch (Exception e)
+                {
+                    Log.Warn(e);
+                    MessageBox.Show("Erreur : l'heure de fin ou l'heure de fin ne sont pas valides.", "Erreur",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    return false;
+                }
+
+                if (appConf.HourEnd < appConf.HourStart)
+                {
+                    MessageBox.Show("Erreur : l'heure de fin est après l'heure de début.", "Erreur",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

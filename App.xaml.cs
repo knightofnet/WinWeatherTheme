@@ -46,6 +46,11 @@ namespace WinWeatherTheme
             {
                 string jsonContent = File.ReadAllText(_fileConf.FullName, Encoding.UTF8);
                 Conf = JsonConvert.DeserializeObject<AppConf>(jsonContent);
+                if (Conf.Proxy == null)
+                {
+                    Conf.Proxy = new WebProxyAppConf() { ProxyUrl = null };
+                    SaveAppConf();
+                }
             }
             else
             {
@@ -60,6 +65,10 @@ namespace WinWeatherTheme
                     {
                         Latitude = 48.866667F,
                         Longitude = 2.333333F
+                    },
+                    Proxy = new WebProxyAppConf()
+                    {
+                        ProxyUrl = null
                     }
 
                 };
@@ -76,7 +85,7 @@ namespace WinWeatherTheme
             }
             catch (Exception ex)
             {
-                _log.Error( ex, "Erreur fatale");
+                _log.Error(ex, "Erreur fatale");
                 Environment.Exit(1);
             }
         }

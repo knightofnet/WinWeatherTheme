@@ -41,6 +41,9 @@ namespace WinWeatherTheme.dto.jsonresponse
 
         [JsonProperty("daily")]
         public Daily Daily;
+
+        [JsonIgnore]
+        public bool IsCallOk { get; set; }
     }
 
     public class Daily

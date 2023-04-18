@@ -9,9 +9,14 @@ namespace WinWeatherTheme.dto
 {
     public class AppConf
     {
+        [JsonProperty("proxySettings")]
+        public WebProxyAppConf Proxy { get; set; }
+
 
         [JsonProperty("coords")]
         public WeatherInputParams Coords { get; set; }
+
+
 
         [JsonProperty("cloudCoverThresholdLight")]
         public double CloudCoverThresholdLight { get; set; }
@@ -27,5 +32,7 @@ namespace WinWeatherTheme.dto
 
         [JsonProperty("isWithTime")]
         public bool IsWithTime { get; set; }
+
+
     }
 }

@@ -37,7 +37,7 @@ namespace WinWeatherTheme.utils
             DateTime dtNow = DateTime.Now;
             if (DateLastUpdate.Add(TsToRefreshInterval).IsBefore(dtNow))
             {
-                LastWeatherJsonResponse =  await FuncRefreshCache(InputParams);
+                LastWeatherJsonResponse = await FuncRefreshCache(InputParams);
                 DateLastUpdate = dtNow;
             }
             return LastWeatherJsonResponse;

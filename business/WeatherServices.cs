@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Security.Policy;
 using System.Text;
@@ -15,12 +16,51 @@ namespace WinWeatherTheme.business
 {
     internal class WeatherServices
     {
-        private readonly string UrlWeather = "https://api.open-meteo.com/v1/forecast";
+        private const string UrlWeather = "https://api.open-meteo.com/v1/forecast";
 
         public async Task<WeatherJsonResponse> GetWeather(float latt, float longi)
         {
-            using (var client = new HttpClient())
+            HttpClientHandler httpClientHandler = null;
+            if (App.Conf.Proxy != null && !string.IsNullOrWhiteSpace(App.Conf.Proxy.ProxyUrl))
             {
+
+                WebProxy proxy = new WebProxy
+                {
+                    Address = new Uri(App.Conf.Proxy.ProxyUrl),
+                    BypassProxyOnLocal = App.Conf.Proxy.BypassProxyOnLocal,
+                    UseDefaultCredentials = App.Conf.Proxy.UseDefaultCredentials
+                };
+
+                // Proxy credentials
+                if (!string.IsNullOrWhiteSpace(App.Conf.Proxy.Username))
+                {
+                    NetworkCredential credentials = new NetworkCredential(
+                        userName: App.Conf.Proxy.Username,
+                        password: App.Conf.Proxy.Password);
+                    proxy.Credentials = credentials;
+                }
+
+                // Create a client handler that uses the proxy
+
+                httpClientHandler = new HttpClientHandler
+                {
+                    Proxy = proxy,
+                };
+
+                if (App.Conf.Proxy.ProxyUrl.ToLower().StartsWith("https"))
+                {
+                    //httpClientHandler.SslProtocols = 
+                }
+
+                // Disable SSL verification
+                httpClientHandler.ServerCertificateCustomValidationCallback =
+                    HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            }
+
+
+            using (HttpClient client = httpClientHandler != null ? new HttpClient(httpClientHandler, true) : new HttpClient())
+            {
+
                 UriBuilder builder = new UriBuilder(UrlWeather);
                 NameValueCollection query = HttpUtility.ParseQueryString(builder.Query);
                 query["latitude"] = latt.ToString(CultureInfo.InvariantCulture);
@@ -34,13 +74,18 @@ namespace WinWeatherTheme.business
 
                 builder.Query = query.ToString();
 
-    
-                
-                var response = await client.GetAsync(builder.Uri);
+
+                HttpResponseMessage response = await client.GetAsync(builder.Uri);
                 string res = await response.Content.ReadAsStringAsync();
 
-                return JsonConvert.DeserializeObject<WeatherJsonResponse>(res);
+                WeatherJsonResponse weatherJsonResponse = JsonConvert.DeserializeObject<WeatherJsonResponse>(res);
+                if (weatherJsonResponse == null)
+                {
+                    throw new Exception("Erreur lors l'appel HTTP");
+                }
 
+                weatherJsonResponse.IsCallOk = response.StatusCode == HttpStatusCode.OK;
+                return weatherJsonResponse;
             }
         }
     }
