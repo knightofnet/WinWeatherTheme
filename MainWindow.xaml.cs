@@ -181,8 +181,18 @@ namespace WinWeatherTheme
                 return;
             }
 
-            App.Conf.Coords.Latitude = float.Parse(tbLatt.Text.Trim().Replace(",", "."), CultureInfo.InvariantCulture);
-            App.Conf.Coords.Longitude = float.Parse(tbLong.Text.Trim().Replace(",", "."), CultureInfo.InvariantCulture);
+            float coordsLatitude = float.Parse(tbLatt.Text.Trim().Replace(",", "."), CultureInfo.InvariantCulture);
+            float coordsLongitude = float.Parse(tbLong.Text.Trim().Replace(",", "."), CultureInfo.InvariantCulture);
+            bool coordHasChanged = Math.Abs(App.Conf.Coords.Latitude - coordsLatitude) > 0.001 || Math.Abs(App.Conf.Coords.Longitude - coordsLongitude) > 0.001;
+
+            if (coordHasChanged)
+            {
+                Log.Debug("Coordonnées GPS ont changé => RaZ cache");
+                App.Session.WeatherResultsCache.DateLastUpdate = new DateTime();
+            }
+
+            App.Conf.Coords.Latitude = coordsLatitude;
+            App.Conf.Coords.Longitude = coordsLongitude;
             App.Conf.HourStart = TimeSpan.Parse(tbHourStart.Text);
             App.Conf.HourEnd = TimeSpan.Parse(tbHourEnd.Text);
             App.Conf.IsWithCoord = chkCoord.IsChecked ?? false;

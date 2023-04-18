@@ -123,8 +123,5 @@
   <ItemGroup>
     <Resource Include="ico.ico" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Paomedia-Small-N-Flat-Clock.ico" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

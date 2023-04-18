@@ -17,7 +17,7 @@ namespace WinWeatherTheme.utils
  
 
         public WeatherInputParams InputParams { get; set; }
-        public DateTime DateLastUpdate { get; private set; }
+        public DateTime DateLastUpdate { get; set; }
 
         public Func<WeatherInputParams, Task<WeatherJsonResponse>> FuncRefreshCache { get; private set; }
 
