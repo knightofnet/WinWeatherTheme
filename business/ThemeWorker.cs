@@ -3,8 +3,10 @@ using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace WinWeatherTheme.business
 {
@@ -60,6 +62,9 @@ namespace WinWeatherTheme.business
             return ThemeChoice.Undetermined;
         }
 
+
+  
+
         public static bool IsFocusAssistEnabled()
         {
             RegistryKey concentrationKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Focus Assist", false);
@@ -74,8 +79,9 @@ namespace WinWeatherTheme.business
                 return false;
             }
 
-            _log.Warn("Erreur : impossible de déterminer l'état de l'assistant de configuration");
-            
+            _log.Warn("Erreur : impossible de déterminer l'état de l'assistant de configuration à partir du registre");
+
+
             return false;
         }
     }

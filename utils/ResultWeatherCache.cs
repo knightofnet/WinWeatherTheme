@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -12,7 +13,7 @@ namespace WinWeatherTheme.utils
 {
     public class ResultWeatherCache
     {
-      
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         public WeatherJsonResponse LastWeatherJsonResponse { get; private set; }
  
 
@@ -35,8 +36,11 @@ namespace WinWeatherTheme.utils
         public async Task<WeatherJsonResponse> GetLastWeatherJsonResponse()
         {
             DateTime dtNow = DateTime.Now;
-            if (DateLastUpdate.Add(TsToRefreshInterval).IsBefore(dtNow))
+            _log.Debug($"ts: {TsToRefreshInterval}, dtNow: {dtNow}, DtLastUpd: {DateLastUpdate}, dtNowDay: {dtNow.DayOfYear}, DtLstDay: {DateLastUpdate.DayOfYear}, dtAdd: {DateLastUpdate.Add(TsToRefreshInterval)}, {DateLastUpdate.Add(TsToRefreshInterval).IsBefore(dtNow)}");
+
+            if (DateLastUpdate.Add(TsToRefreshInterval).IsBefore(dtNow) || dtNow.DayOfYear != DateLastUpdate.DayOfYear)
             {
+                _log.Debug("refresh weather from server");
                 LastWeatherJsonResponse = await FuncRefreshCache(InputParams);
                 DateLastUpdate = dtNow;
             }

@@ -141,7 +141,11 @@ namespace WinWeatherTheme
                     lblStatus.Content = "Arrêté";
                 }
 
-                ToggleTheme(ThemeWorker.ThemeChoice.Undetermined);
+                ThemeWorker.ThemeChoice themeChoice = ToggleTheme(ThemeWorker.ThemeChoice.Undetermined);
+
+                bool isLightTheme = themeChoice == ThemeWorker.ThemeChoice.Light;
+                rdThLight.IsChecked = isLightTheme;
+                rdThDark.IsChecked = !isLightTheme;
 
             };
 
@@ -284,7 +288,7 @@ namespace WinWeatherTheme
             {
                 Log.Debug("=> Change");
 
-                ToggleTheme(isLightTheme
+                ThemeWorker.ThemeChoice toggleTheme = ToggleTheme(isLightTheme
                     ? ThemeWorker.ThemeChoice.Light
                     : ThemeWorker.ThemeChoice.Dark);
 
@@ -319,7 +323,7 @@ namespace WinWeatherTheme
             }
         }
 
-        private static void ToggleTheme(ThemeWorker.ThemeChoice theme)
+        private static ThemeWorker.ThemeChoice ToggleTheme(ThemeWorker.ThemeChoice theme)
         {
             if (theme == ThemeWorker.ThemeChoice.Undetermined)
             {
@@ -330,6 +334,10 @@ namespace WinWeatherTheme
 
             ThemeWorker.SetAppTheme(theme);
             ThemeWorker.SetSystemTheme(theme);
+
+            return theme;
+
+
         }
 
         private void chkCoord_Click(object sender, RoutedEventArgs e)
@@ -463,6 +471,12 @@ namespace WinWeatherTheme
             }
         }
 
+        private void lblRes_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            App.Session.WeatherResultsCache.DateLastUpdate = new DateTime();
+            System.Media.SystemSounds.Beep.Play();
 
+
+        }
     }
 }

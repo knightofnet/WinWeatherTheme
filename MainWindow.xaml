@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WinWeatherTheme"
         mc:Ignorable="d"
-        Title="WinWeatherTheme" Height="274" Width="569" Closing="Window_Closing">
+        Title="WinWeatherTheme" Height="290" Width="570" Closing="Window_Closing">
     <Grid>
         <GroupBox x:Name="gbCoord" Header="Options" Margin="10,10,10,30">
             <Grid >
@@ -17,7 +17,7 @@
                     <Label Content="Longitude : " HorizontalAlignment="Left" Margin="167,0,0,0" VerticalAlignment="Center"/>
                     <TextBox x:Name="tbLong" HorizontalAlignment="Left" Margin="239,0,0,0" TextWrapping="Wrap" Text="0.701236" VerticalAlignment="Center" Width="100"/>
 
-                    <Label x:Name="lblRes" Content="RES" HorizontalAlignment="Left" Margin="344,0,0,0" VerticalAlignment="Center"/>
+                    <Label x:Name="lblRes" Content="RES" HorizontalAlignment="Left" Margin="344,0,0,0" VerticalAlignment="Center" MouseDoubleClick="lblRes_MouseDoubleClick"/>
                 </Grid>
 
                 <CheckBox x:Name="chkTime" Content="Selon l'heure" HorizontalAlignment="Left" Margin="10,59,0,0" VerticalAlignment="Top" Click="chkTime_Click"/>
