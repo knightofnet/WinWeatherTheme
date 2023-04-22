@@ -15,7 +15,15 @@ namespace WinWeatherTheme.dto
 
         [JsonProperty("long")]
         public float Longitude { get; set; }
-        
+
+        [JsonProperty("cloudCoverThresholdLight")]
+        public double CloudCoverThresholdLight { get; set; }
+
+        [JsonProperty("refreshInterval")]
+        public int RefreshInterval { get; set; }
+
+        [JsonProperty("model")]
+        public string Model { get; set; }
 
     }
 }

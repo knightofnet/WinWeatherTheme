@@ -23,6 +23,7 @@ using WinWeatherTheme.business;
 using WinWeatherTheme.dto;
 using WinWeatherTheme.dto.jsonresponse;
 using WinWeatherTheme.utils;
+using WinWeatherTheme.views;
 using MessageBox = System.Windows.MessageBox;
 using FormContextMenu = System.Windows.Forms.ContextMenu;
 using FormMenuItem = System.Windows.Forms.MenuItem;
@@ -53,14 +54,16 @@ namespace WinWeatherTheme
             InitElement();
 
             App.Session.WeatherResultsCache =
-                new ResultWeatherCache(RefreshWeatherRes, TimeSpan.FromHours(1), App.Conf.Coords);
+                new ResultWeatherCache(RefreshWeatherRes, TimeSpan.FromMinutes(App.Conf.WeatherParams.RefreshInterval), App.Conf.WeatherParams);
         }
 
         private async Task<WeatherJsonResponse> RefreshWeatherRes(WeatherInputParams arg)
         {
             Log.Debug("refresh weather");
             WeatherJsonResponse weatherJsonResponse =
-                await _weatherServices.GetWeather(App.Conf.Coords.Latitude, App.Conf.Coords.Longitude);
+                await _weatherServices.GetWeather(App.Conf.WeatherParams.Latitude,
+                    App.Conf.WeatherParams.Longitude,
+                    App.Conf.WeatherParams.Model);
 
             if (weatherJsonResponse.IsCallOk)
             {
@@ -89,13 +92,13 @@ namespace WinWeatherTheme
 
             chkCoord.IsChecked = App.Conf.IsWithCoord;
             chkTime.IsChecked = App.Conf.IsWithTime;
-            chkNoChangeIfFocusAssist.IsChecked = App.Conf.IsNoChangeIfFocusAssist;
+
 
             grCoord.IsEnabled = chkCoord.IsChecked ?? false;
             grTime.IsEnabled = chkTime.IsChecked ?? false;
 
-            tbLatt.Text = App.Conf.Coords.Latitude.ToString(CultureInfo.InvariantCulture);
-            tbLong.Text = App.Conf.Coords.Longitude.ToString(CultureInfo.InvariantCulture);
+            tbLatt.Text = App.Conf.WeatherParams.Latitude.ToString(CultureInfo.InvariantCulture);
+            tbLong.Text = App.Conf.WeatherParams.Longitude.ToString(CultureInfo.InvariantCulture);
             tbHourStart.Text = App.Conf.HourStart.ToString("h\\:mm");
             tbHourEnd.Text = App.Conf.HourEnd.ToString("h\\:mm");
 
@@ -187,7 +190,7 @@ namespace WinWeatherTheme
 
             float coordsLatitude = float.Parse(tbLatt.Text.Trim().Replace(",", "."), CultureInfo.InvariantCulture);
             float coordsLongitude = float.Parse(tbLong.Text.Trim().Replace(",", "."), CultureInfo.InvariantCulture);
-            bool coordHasChanged = Math.Abs(App.Conf.Coords.Latitude - coordsLatitude) > 0.001 || Math.Abs(App.Conf.Coords.Longitude - coordsLongitude) > 0.001;
+            bool coordHasChanged = Math.Abs(App.Conf.WeatherParams.Latitude - coordsLatitude) > 0.001 || Math.Abs(App.Conf.WeatherParams.Longitude - coordsLongitude) > 0.001;
 
             if (coordHasChanged)
             {
@@ -195,13 +198,13 @@ namespace WinWeatherTheme
                 App.Session.WeatherResultsCache.DateLastUpdate = new DateTime();
             }
 
-            App.Conf.Coords.Latitude = coordsLatitude;
-            App.Conf.Coords.Longitude = coordsLongitude;
+            App.Conf.WeatherParams.Latitude = coordsLatitude;
+            App.Conf.WeatherParams.Longitude = coordsLongitude;
             App.Conf.HourStart = TimeSpan.Parse(tbHourStart.Text);
             App.Conf.HourEnd = TimeSpan.Parse(tbHourEnd.Text);
             App.Conf.IsWithCoord = chkCoord.IsChecked ?? false;
             App.Conf.IsWithTime = chkTime.IsChecked ?? false;
-            App.Conf.IsNoChangeIfFocusAssist = chkNoChangeIfFocusAssist.IsChecked ?? false;
+
 
             if (_mainTimer != null)
             {
@@ -253,7 +256,7 @@ namespace WinWeatherTheme
 
                 lblRes.Content = $"Temperature: {temperature}, cloudCover: {cloudCover}";
 
-                bool cloudCoverChoice = cloudCover >= App.Conf.CloudCoverThresholdLight;
+                bool cloudCoverChoice = cloudCover >= App.Conf.WeatherParams.CloudCoverThresholdLight;
                 Log.Debug("Cloud cover choice : {0}", cloudCoverChoice);
 
                 bool isInDay = dt >= wResp.Daily.SunriseDatetime && dt < wResp.Daily.SunsetDatetime;
@@ -365,12 +368,12 @@ namespace WinWeatherTheme
             if (isWithCoord && isWithTime)
             {
                 txtLbl =
-                    $"Le theme clair sera activité si la couverture nuageuse est supérieure à {App.Conf.CloudCoverThresholdLight}% et entre {timeStart} et {timeEnd}.";
+                    $"Le theme clair sera activité si la couverture nuageuse est supérieure à {App.Conf.WeatherParams.CloudCoverThresholdLight}% et entre {timeStart} et {timeEnd}.";
             }
             else if (isWithCoord)
             {
                 txtLbl =
-                    $"Le theme clair sera activé si la couverture nuagueuse est supérieure à {App.Conf.CloudCoverThresholdLight}%.";
+                    $"Le theme clair sera activé si la couverture nuagueuse est supérieure à {App.Conf.WeatherParams.CloudCoverThresholdLight}%.";
             }
             else if (isWithTime)
             {
@@ -390,15 +393,15 @@ namespace WinWeatherTheme
             appConf.IsWithCoord = chkCoord.IsChecked ?? false;
             appConf.IsWithTime = chkTime.IsChecked ?? false;
 
-            appConf.Coords = new WeatherInputParams();
+            appConf.WeatherParams = new WeatherInputParams();
 
             if (appConf.IsWithCoord)
             {
                 try
                 {
-                    appConf.Coords.Latitude =
+                    appConf.WeatherParams.Latitude =
                         float.Parse(tbLatt.Text.Trim().Replace(",", "."), CultureInfo.InvariantCulture);
-                    appConf.Coords.Longitude =
+                    appConf.WeatherParams.Longitude =
                         float.Parse(tbLong.Text.Trim().Replace(",", "."), CultureInfo.InvariantCulture);
                 }
                 catch (Exception e)
@@ -410,7 +413,7 @@ namespace WinWeatherTheme
                     return false;
                 }
 
-                if (Math.Abs(appConf.Coords.Latitude) > 90F)
+                if (Math.Abs(appConf.WeatherParams.Latitude) > 90F)
                 {
                     MessageBox.Show("Erreur : la latitude doit être comprise entre -90 et 90.", "Erreur",
                         MessageBoxButton.OK,
@@ -418,7 +421,7 @@ namespace WinWeatherTheme
                     return false;
                 }
 
-                if (Math.Abs(appConf.Coords.Longitude) > 180F)
+                if (Math.Abs(appConf.WeatherParams.Longitude) > 180F)
                 {
                     MessageBox.Show("Erreur : la longitude doit être comprise entre -180 et 180.", "Erreur",
                         MessageBoxButton.OK,
@@ -477,6 +480,22 @@ namespace WinWeatherTheme
             System.Media.SystemSounds.Beep.Play();
 
 
+        }
+
+        private void btnOptWeather_Click(object sender, RoutedEventArgs e)
+        {
+            WeatherOptions wOpt = new WeatherOptions();
+            wOpt.LoadsWith(App.Conf.WeatherParams);
+
+            if (wOpt.ShowDialog() ?? false)
+            {
+                wOpt.UpdateObj(App.Conf.WeatherParams);
+                App.Session.WeatherResultsCache.DateLastUpdate = new DateTime();
+
+                App.Session.WeatherResultsCache.TsToRefreshInterval = TimeSpan.FromMinutes(App.Conf.WeatherParams.RefreshInterval);
+
+                App.SaveAppConf();
+            }
         }
     }
 }

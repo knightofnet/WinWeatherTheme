@@ -13,13 +13,12 @@ namespace WinWeatherTheme.dto
         public WebProxyAppConf Proxy { get; set; }
 
 
-        [JsonProperty("coords")]
-        public WeatherInputParams Coords { get; set; }
+        [JsonProperty("weatherParams")]
+        public WeatherInputParams WeatherParams { get; set; }
 
 
 
-        [JsonProperty("cloudCoverThresholdLight")]
-        public double CloudCoverThresholdLight { get; set; }
+
 
         [JsonProperty("hourStart")]
         public TimeSpan HourStart { get; set; }

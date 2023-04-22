@@ -13,7 +13,7 @@ namespace WinWeatherTheme.utils
 {
     public class ResultWeatherCache
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         public WeatherJsonResponse LastWeatherJsonResponse { get; private set; }
  
 
@@ -22,7 +22,7 @@ namespace WinWeatherTheme.utils
 
         public Func<WeatherInputParams, Task<WeatherJsonResponse>> FuncRefreshCache { get; private set; }
 
-        public TimeSpan TsToRefreshInterval { get; private set; }
+        public TimeSpan TsToRefreshInterval { get; set; }
 
         public ResultWeatherCache(Func<WeatherInputParams, Task<WeatherJsonResponse>> funcRefresh,
             TimeSpan tsToRefreshInterval, WeatherInputParams inputParams)
@@ -36,11 +36,11 @@ namespace WinWeatherTheme.utils
         public async Task<WeatherJsonResponse> GetLastWeatherJsonResponse()
         {
             DateTime dtNow = DateTime.Now;
-            _log.Debug($"ts: {TsToRefreshInterval}, dtNow: {dtNow}, DtLastUpd: {DateLastUpdate}, dtNowDay: {dtNow.DayOfYear}, DtLstDay: {DateLastUpdate.DayOfYear}, dtAdd: {DateLastUpdate.Add(TsToRefreshInterval)}, {DateLastUpdate.Add(TsToRefreshInterval).IsBefore(dtNow)}");
+            Log.Debug($"ts: {TsToRefreshInterval}, dtNow: {dtNow}, DtLastUpd: {DateLastUpdate}, dtNowDay: {dtNow.DayOfYear}, DtLstDay: {DateLastUpdate.DayOfYear}, dtAdd: {DateLastUpdate.Add(TsToRefreshInterval)}, {DateLastUpdate.Add(TsToRefreshInterval).IsBefore(dtNow)}");
 
             if (DateLastUpdate.Add(TsToRefreshInterval).IsBefore(dtNow) || dtNow.DayOfYear != DateLastUpdate.DayOfYear)
             {
-                _log.Debug("refresh weather from server");
+                Log.Debug("refresh weather from server");
                 LastWeatherJsonResponse = await FuncRefreshCache(InputParams);
                 DateLastUpdate = dtNow;
             }

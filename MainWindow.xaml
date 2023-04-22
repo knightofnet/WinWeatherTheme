@@ -10,18 +10,19 @@
         <GroupBox x:Name="gbCoord" Header="Options" Margin="10,10,10,30">
             <Grid >
                 <CheckBox x:Name="chkCoord" Content="Selon couverture nuageuse" HorizontalAlignment="Left" Margin="10,8,0,0" VerticalAlignment="Top" Click="chkCoord_Click"/>
-                <Grid x:Name="grCoord" HorizontalAlignment="Left" Height="26" VerticalAlignment="Top" Margin="10,28,0,0">
-                    <Label Content="Latitude : " HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                    <TextBox x:Name="tbLatt" HorizontalAlignment="Left" Margin="62,0,0,0" TextWrapping="Wrap" Text="47.421436" VerticalAlignment="Center" Width="100"/>
+                <Grid x:Name="grCoord" HorizontalAlignment="Left"  VerticalAlignment="Top" Margin="10,28,0,0">
+                    <Label Content="Latitude : " HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <TextBox x:Name="tbLatt" HorizontalAlignment="Left" Margin="62,0,0,0" TextWrapping="Wrap" Text="47.421436" VerticalAlignment="Top" Width="100"/>
 
-                    <Label Content="Longitude : " HorizontalAlignment="Left" Margin="167,0,0,0" VerticalAlignment="Center"/>
-                    <TextBox x:Name="tbLong" HorizontalAlignment="Left" Margin="239,0,0,0" TextWrapping="Wrap" Text="0.701236" VerticalAlignment="Center" Width="100"/>
-
-                    <Label x:Name="lblRes" Content="RES" HorizontalAlignment="Left" Margin="344,0,0,0" VerticalAlignment="Center" MouseDoubleClick="lblRes_MouseDoubleClick"/>
+                    <Label Content="Longitude : " HorizontalAlignment="Left" Margin="167,0,0,0" VerticalAlignment="Top"/>
+                    <TextBox x:Name="tbLong" HorizontalAlignment="Left" Margin="239,0,0,0" TextWrapping="Wrap" Text="0.701236" VerticalAlignment="Top" Width="100"/>
+                    <Button x:Name="btnOptWeather" Content="Options" HorizontalAlignment="Left" Margin="0,26,0,3" Width="62" Click="btnOptWeather_Click"/>
+                    <Label x:Name="lblRes" Content="RES" HorizontalAlignment="Left" Margin="67,24,0,0" VerticalAlignment="Top" MouseDoubleClick="lblRes_MouseDoubleClick"/>
+                    
                 </Grid>
 
-                <CheckBox x:Name="chkTime" Content="Selon l'heure" HorizontalAlignment="Left" Margin="10,59,0,0" VerticalAlignment="Top" Click="chkTime_Click"/>
-                <Grid x:Name="grTime" HorizontalAlignment="Left" Height="26" VerticalAlignment="Top"  Margin="10,79,0,0">
+                <CheckBox x:Name="chkTime" Content="Selon l'heure" HorizontalAlignment="Left" Margin="10,83,0,0" VerticalAlignment="Top" Click="chkTime_Click"/>
+                <Grid x:Name="grTime" HorizontalAlignment="Left" Height="26" VerticalAlignment="Top"  Margin="10,106,0,0">
                     <Label Content="Heure début : " HorizontalAlignment="Left" VerticalAlignment="Center"/>
                     <TextBox x:Name="tbHourStart" HorizontalAlignment="Left" Margin="86,0,0,0" TextWrapping="Wrap" Text="12:00" VerticalAlignment="Center" Width="100"/>
 
@@ -29,12 +30,10 @@
                     <TextBox x:Name="tbHourEnd" HorizontalAlignment="Left" Margin="259,0,0,0" TextWrapping="Wrap" Text="18:00" VerticalAlignment="Center" Width="100"/>
                 </Grid>
 
-                <CheckBox x:Name="chkNoChangeIfFocusAssist" Content="Ne pas changer le theme si l'assistant de concentration est activé" HorizontalAlignment="Left" Margin="10,110,0,0" VerticalAlignment="Top"/>
-
 
                 <Button x:Name="btnApplyCoord" Content="Appliquer" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Height="21" Width="79" Click="btnApplyCoord_Click"/>
 
-                <TextBlock x:Name="lblShowOptions" Text="Label" Margin="10,130,10,0" VerticalAlignment="Top" TextWrapping="Wrap"/>
+                <TextBlock x:Name="lblShowOptions" Text="Label" Margin="10,137,10,0" VerticalAlignment="Top" TextWrapping="Wrap"/>
 
 
             </Grid>

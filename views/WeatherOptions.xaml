@@ -1,0 +1,32 @@
+﻿<Window x:Class="WinWeatherTheme.views.WeatherOptions"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WinWeatherTheme.views"
+        xmlns:winWeatherTheme="clr-namespace:WinWeatherTheme"
+        xmlns:usercontrol="clr-namespace:UsefulCsharpCommonsUtils.ui.usercontrol;assembly=UsefulCsharpCommonsUtils"
+        mc:Ignorable="d"
+        Title="WeatherOptions" Height="429" Width="593">
+    <Grid>
+        <GroupBox x:Name="groupBox" Header="Options" Margin="10,10,10,281">
+            <Grid>
+                <Label  Content="Rafraichissement météo :" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="tbRefreshWeather" HorizontalAlignment="Left" Margin="160,14,0,0" TextWrapping="NoWrap" Text="XXX" VerticalAlignment="Top" Width="60"/>
+
+                <Label Content="Modèle météo :" HorizontalAlignment="Left" Margin="10,41,0,0" VerticalAlignment="Top"/>
+                <ComboBox x:Name="cbWeatherModels" HorizontalAlignment="Left" Margin="108,43,0,0" VerticalAlignment="Top" Width="150"/>
+
+            </Grid>
+        </GroupBox>
+        <GroupBox x:Name="groupBox1" Header="Derniers résultats météo " Margin="10,137,10,58">
+            <Grid >
+                <Label x:Name="lblLastWeatherTime" Content="Dernier résultat météo" HorizontalAlignment="Left" Margin="0,10,0,0" VerticalAlignment="Top"/>
+                <DataGrid x:Name="dgLastResults" Margin="0,41,0,10"/>
+                
+            </Grid>
+        </GroupBox>
+
+        <usercontrol:btnOkCancelUc x:Name="btnOkCancel" Margin="0,0,10,10" HorizontalAlignment="Right" Width="174" Height="43" VerticalAlignment="Bottom" OnCancelClick="btnOkCancel_OnCancelClick" OnOkClick="btnOkCancel_OnOkClick" />
+    </Grid>
+</Window>

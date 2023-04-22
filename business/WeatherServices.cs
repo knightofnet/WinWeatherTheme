@@ -22,7 +22,7 @@ namespace WinWeatherTheme.business
 
         private const string UrlWeather = "https://api.open-meteo.com/v1/forecast";
 
-        public async Task<WeatherJsonResponse> GetWeather(float latt, float longi)
+        public async Task<WeatherJsonResponse> GetWeather(float latt, float longi, string weatherModel)
         {
             HttpClientHandler httpClientHandler = null;
             if (App.Conf.Proxy != null && !string.IsNullOrWhiteSpace(App.Conf.Proxy.ProxyUrl))
@@ -43,7 +43,7 @@ namespace WinWeatherTheme.business
 
                     query["hourly"] = "temperature_2m,cloudcover";
                     query["daily"] = "sunrise,sunset";
-                    query["models"] = "meteofrance_seamless";
+                    query["models"] = weatherModel;
                     query["forecast_days"] = "1";
                     query["timezone"] = "Europe/Berlin";
 

@@ -58,13 +58,15 @@ namespace WinWeatherTheme
                 Conf = new AppConf()
                 {
                     IsWithTime = true,
-                    CloudCoverThresholdLight = 70,
                     HourStart = new TimeSpan(9, 0, 0),
                     HourEnd = new TimeSpan(20, 0, 0),
-                    Coords = new WeatherInputParams()
+                    WeatherParams = new WeatherInputParams()
                     {
                         Latitude = 48.866667F,
-                        Longitude = 2.333333F
+                        Longitude = 2.333333F,
+                        CloudCoverThresholdLight = 70,
+                        Model = "meteofrance_seamless",
+                        RefreshInterval = 60
                     },
                     Proxy = new WebProxyAppConf()
                     {

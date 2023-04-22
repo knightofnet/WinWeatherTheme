@@ -60,8 +60,8 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="UsefulCsharpCommonsUtils">
-      <HintPath>E:\CSharp\Projects\UsefulCsharpCommonsUtils\bin\Debug\UsefulCsharpCommonsUtils.dll</HintPath>
+    <Reference Include="UsefulCsharpCommonsUtils, Version=1.1.325.567, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\UsefulCsharpCommonsUtils.1.1.325.567\lib\net452\UsefulCsharpCommonsUtils.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
@@ -75,6 +75,9 @@
     <Compile Include="dto\WeatherInputParams.cs" />
     <Compile Include="dto\WebProxyAppConf.cs" />
     <Compile Include="utils\ResultWeatherCache.cs" />
+    <Compile Include="views\WeatherOptions.xaml.cs">
+      <DependentUpon>WeatherOptions.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -92,6 +95,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="views\WeatherOptions.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -123,5 +130,6 @@
   <ItemGroup>
     <Resource Include="ico.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
